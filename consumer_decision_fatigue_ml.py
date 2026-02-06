@@ -67,7 +67,7 @@ print("Mean CV:", cv_scores.mean())
 
 import pandas as pd
 
-df = pd.read_csv("/Users/elifparildar/Desktop/project_final_clean.csv")
+# df = pd.read_csv("project_final_clean.csv")  # local path, not shared
 
 # analize girecek minimal df
 df_m = df[["condition","Fatigue_score","Satisfaction_score","Intention_score","Decision_Time"]].copy()
@@ -93,10 +93,9 @@ plt.show()
 import pandas as pd
 import numpy as np
 
-# Model içindeki logistic regression'ı çekiyoruz
+
 log_reg = clf.named_steps["model"]
 
-# Coefficient'lar (3 class x 4 feature)
 coefs = log_reg.coef_
 
 features = X.columns
