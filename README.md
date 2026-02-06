@@ -22,3 +22,8 @@ This notebook is intended as a methodological complement to the main experimenta
 
 ## Files
 - `consumer_decision_fatigue_ml.ipynb`: exploratory machine learning analysis
+
+## Implementation Note
+
+The primary reference implementation for this analysis is provided as a Python script (`.py`).
+Raw data is not included in this repository due to participant privacy, and file paths are therefore illustrative.
