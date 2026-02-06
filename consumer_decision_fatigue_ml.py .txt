@@ -1,0 +1,113 @@
+"""
+Consumer Decision Fatigue – Exploratory Machine Learning Analysis
+
+This script documents an exploratory ML workflow using logistic regression.
+Raw data is not included due to participant privacy.
+"""
+import pandas as pd
+import numpy as np
+
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.dummy import DummyClassifier
+
+import matplotlib.pyplot as plt
+
+# df = pd.read_csv("project_final_clean.csv")  # local path, not shared
+
+# 2) Minimal dataset
+needed_cols = ["condition", "Fatigue_score", "Satisfaction_score", "Intention_score", "Decision_Time"]
+df_m = df[needed_cols].copy()
+
+# 3) Map condition labels
+mapping = {1: "High Choice", 2: "High Choice + Popular", 3: "Low Choice"}
+df_m["condition"] = df_m["condition"].map(mapping)
+
+# Safety checks
+print("Shape:", df_m.shape)
+print("Missing:\n", df_m.isna().sum())
+print("\nGroup counts:\n", df_m["condition"].value_counts())
+
+# 4) X/y
+X = df_m[["Fatigue_score","Satisfaction_score","Intention_score","Decision_Time"]]
+y = df_m["condition"]
+
+# 5) Train-test split (stratified)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.30, random_state=42, stratify=y
+)
+
+# 6) Model pipeline
+clf = Pipeline([
+    ("scaler", StandardScaler()),
+    ("model", LogisticRegression(max_iter=5000, solver="lbfgs"))
+])
+
+clf.fit(X_train, y_train)
+pred = clf.predict(X_test)
+
+print("\nLogistic accuracy:", accuracy_score(y_test, pred))
+print("\nConfusion matrix:\n", confusion_matrix(y_test, pred))
+print("\nReport:\n", classification_report(y_test, pred))
+
+# 7) Dummy baseline
+dummy = DummyClassifier(strategy="most_frequent")
+dummy.fit(X_train, y_train)
+dummy_pred = dummy.predict(X_test)
+print("\nDummy accuracy:", accuracy_score(y_test, dummy_pred))
+
+# 8) Cross-val (more stable estimate)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+cv_scores = cross_val_score(clf, X, y, cv=cv)
+print("\nCV scores:", cv_scores)
+print("Mean CV:", cv_scores.mean())
+
+import pandas as pd
+
+df = pd.read_csv("/Users/elifparildar/Desktop/project_final_clean.csv")
+
+# analize girecek minimal df
+df_m = df[["condition","Fatigue_score","Satisfaction_score","Intention_score","Decision_Time"]].copy()
+
+mapping = {1: "High Choice", 2: "High Choice + Popular", 3: "Low Choice"}
+df_m["condition"] = df_m["condition"].map(mapping)
+
+df_m.head(), df_m["condition"].value_counts()
+
+# 9) Coef table (exploratory)
+log_reg = clf.named_steps["model"]
+coef_df = pd.DataFrame(log_reg.coef_, columns=X.columns, index=log_reg.classes_)
+print("\nCoefficients (standardized features):\n", coef_df)
+
+importance = coef_df.abs().mean().sort_values(ascending=False)
+print("\nMean absolute coef (exploratory importance):\n", importance)
+
+importance.plot(kind="bar")
+plt.title("Exploratory Feature Importance (Mean |coef|)")
+plt.ylabel("Mean Absolute Coefficient")
+plt.show()
+
+import pandas as pd
+import numpy as np
+
+# Model içindeki logistic regression'ı çekiyoruz
+log_reg = clf.named_steps["model"]
+
+# Coefficient'lar (3 class x 4 feature)
+coefs = log_reg.coef_
+
+features = X.columns
+classes = log_reg.classes_
+
+coef_df = pd.DataFrame(
+    coefs,
+    columns=features,
+    index=classes
+)
+
+coef_df
+
+
